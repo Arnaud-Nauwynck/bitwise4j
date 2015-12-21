@@ -1,6 +1,7 @@
 package fr.an.util.encoder.huffman;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.Queue;
 
 import fr.an.util.bits.BitInputStream;
 import fr.an.util.bits.BitOutputStream;
+import fr.an.util.encoder.structio.BitStreamStructDataOutput;
+import fr.an.util.encoder.structio.Value2StructDataOutputWriter;
 
 /**
  * 
@@ -93,6 +96,10 @@ public class HuffmanTable<T> {
 		return symbolLeafMap.get(symbol);
 	}
 
+	public Collection<HuffmanTreeLeaf<T>> getSymbolLeafs() {
+        return symbolLeafMap.values();
+	}
+
 	public HuffmanBitsCode getSymbolCode(T symbol) {
 	    HuffmanTreeLeaf<T> leaf = getSymbolLeaf(symbol);
 	    if (leaf == null) {
@@ -105,7 +112,13 @@ public class HuffmanTable<T> {
 	    HuffmanBitsCode code = getSymbolCode(symbol);
 	    code.writeCodeTo(out);
 	}
-	
+
+	// idem, using BitStreamStructDataOutput
+	public void writeEncodeSymbol(BitStreamStructDataOutput out, T symbol) {
+        HuffmanBitsCode code = getSymbolCode(symbol);
+        code.writeCodeTo(out);
+    }
+
 	public T readDecodeSymbol(BitInputStream in) {
 	    T res;
 	    HuffmanTreeNode<T> node = getRootNode();
@@ -163,5 +176,28 @@ public class HuffmanTable<T> {
 	public HuffmanTreeNode<T> getRootNode() {
 		return mergedNodes.get(mergedNodes.size() - 1);
 	}
+
+    public int getMaxCodeBitLen() {
+        int res = 0;
+        for(HuffmanTreeLeaf<T> node : symbolLeafMap.values()) {
+            res = Math.max(res, node.getResultCode().getBitsCount());
+        }
+        return res;
+    }
+
+    
+    public void writeEncode(BitStreamStructDataOutput bitsStructOutput, final int maxSymbolCount,
+            Value2StructDataOutputWriter<T> symbolWriter) {
+        bitsStructOutput.writeUIntLt16ElseMax(maxSymbolCount, getSymbolCount());
+        final int maxCodeBitLen = getMaxCodeBitLen();
+        bitsStructOutput.writeIntMinMax(1, getSymbolCount(), maxCodeBitLen);
+        for (HuffmanTreeLeaf<T> symbolNode : symbolLeafMap.values()) {
+            HuffmanBitsCode symbolCode = symbolNode.getResultCode();
+            int symbolBitsCount = symbolCode.getBitsCount();
+            bitsStructOutput.writeIntMinMax(1, maxCodeBitLen, symbolBitsCount);
+            bitsStructOutput.writeNBits(symbolBitsCount, symbolCode.getBits());
+            symbolWriter.writeTo(bitsStructOutput, symbolNode.getSymbol());
+        }
+    }
 
 }

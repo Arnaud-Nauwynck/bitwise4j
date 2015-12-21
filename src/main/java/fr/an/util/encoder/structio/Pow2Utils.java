@@ -9,7 +9,7 @@ public final class Pow2Utils {
     static {
         int[] tmpres = new int[1024];
         for(int i = 0; i < 1024; i++) {
-            tmpres[i] = valueToUpperLog2(i);
+            tmpres[i] = doValueToUpperLog2(i);
         }
         INTS1024_TO_UPPERLOG2 = tmpres;
     }

@@ -1,6 +1,7 @@
 package fr.an.util.encoder.huffman;
 
 import fr.an.util.bits.BitOutputStream;
+import fr.an.util.encoder.structio.BitStreamStructDataOutput;
 
 /**
  * 
@@ -59,7 +60,16 @@ public class HuffmanBitsCode {
 	        throw new UnsupportedOperationException("TODO unsupported huffman code > 32 bits");
 	    }
 	}
-	
+
+	// idem using 
+	public void writeCodeTo(BitStreamStructDataOutput out) {
+        if (bitsCount <= 32) {
+            out.writeNBits(bitsCount, bits);
+        } else {
+            throw new UnsupportedOperationException("TODO unsupported huffman code > 32 bits");
+        }
+    }
+
 	public void codeToString(StringBuilder sb) {
 		for (int i = bitsCount - 1; i >= 0; i--) {
 			boolean bit = getBit(i);

@@ -82,4 +82,16 @@ public class BitStreamStructDataOutput implements StructDataOutput {
         }
     }
     
+    
+
+    public void writeUIntLt16ElseMax(int max, int value) {
+        if (value < 16) {
+            writeBit(false);
+            writeIntMinMax(0, 16, value);
+        } else {
+            writeBit(true);
+            writeIntMinMax(16, max, value);
+        }
+    }
+
 }

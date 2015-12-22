@@ -68,12 +68,20 @@ public class HuffmanTable<T> {
             return res;
         }
     }
+
+    public HuffmanTreeLeaf<T> incrSymbolFreq(T symbol, int freq) {
+        HuffmanTreeLeaf<T> leaf = symbolLeafMap.get(symbol);
+        if (leaf == null) {
+            int seqNumber = symbolLeafMap.size();
+            leaf = new HuffmanTreeLeaf<T>(this, 0, seqNumber, symbol);
+            symbolLeafMap.put(symbol, leaf);
+        }
+        leaf.frequency += freq;
+        return leaf;
+    }
     
 	public HuffmanTreeLeaf<T> addSymbol(T symbol, int freq) {
-		int seqNumber = symbolLeafMap.size();
-		HuffmanTreeLeaf<T> p = new HuffmanTreeLeaf<T>(this, freq, seqNumber, symbol);
-		symbolLeafMap.put(symbol, p);
-		return p;
+	    return incrSymbolFreq(symbol, freq);
 	}
 
 	public void addSymbols(SymbolsCounter<T> symbolCounts) {

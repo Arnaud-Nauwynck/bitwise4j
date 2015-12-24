@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.function.Function;
 
 import fr.an.util.bits.BitInputStream;
 import fr.an.util.bits.BitOutputStream;
@@ -40,7 +41,12 @@ public class HuffmanTable<T> {
         addSymbols(symbolCounts);
         compute();
     }
-    	
+
+    public void clear() {
+        symbolLeafMap.clear();
+        mergedNodes.clear();
+    }
+
 	// ------------------------------------------------------------------------
 
 	public int getSymbolCount() {
@@ -144,6 +150,14 @@ public class HuffmanTable<T> {
 	}
 	
 	public void compute() {
+	    if (symbolLeafMap.size() <= 1) {
+	        // degenerated table
+	        if (! symbolLeafMap.isEmpty()) {
+	            HuffmanTreeLeaf<T> uniqueLeaf = symbolLeafMap.values().iterator().next();
+	            uniqueLeaf.resultCode = HuffmanBitsCode.getRootEmptyCode(); 
+	        }
+	        return;
+	    }
 		mergedNodes.clear();
 		Queue<AbstractHuffmanNode<T>> queue = new PriorityQueue<AbstractHuffmanNode<T>>(symbolLeafMap.size());
 		queue.addAll(symbolLeafMap.values());
@@ -208,4 +222,51 @@ public class HuffmanTable<T> {
         }
     }
 
+    public void dump(StringBuilder sb, Function<T,String> symbolToString) {
+        sb.append("HuffmanTable [symbolsCount=" + symbolLeafMap.size() + "\n");
+        int maxSymbolFreq = 0;
+        HuffmanTreeLeaf<T> mostFrequentLeaf = null;
+        for(HuffmanTreeLeaf<T> p : symbolLeafMap.values()) {
+            if (p.getFrequency() > maxSymbolFreq) {
+                maxSymbolFreq = p.getFrequency();
+                mostFrequentLeaf = p;
+            }
+        }
+        sb.append("most frequent symbol: '" + symbolToString.apply(mostFrequentLeaf.getSymbol()) + "' " + mostFrequentLeaf.getResultCode().toString() + " freq:" + mostFrequentLeaf.getFrequency() + "\n");
+        
+        getRootNode().accept(new HuffmanNodeVisitor<T>() {
+            private int indent = 0;
+            public void caseNode(HuffmanTreeNode<T> p) {
+                printIndent(sb, indent);
+                sb.append("intermediateNode: " + p.getResultCode().toString() + " freq:" + p.getFrequency() + "\n");
+                indent++;
+                p.visitChildren(this);
+                indent--;
+            }
+            public void caseLeaf(HuffmanTreeLeaf<T> p) {
+                printIndent(sb, indent);
+                sb.append("Node: '" + symbolToString.apply(p.getSymbol()) + "' " + p.getResultCode().toString() + " freq:" + p.getFrequency() + "\n");
+            }
+        });
+        sb.append("]");
+    }
+
+    public String toStringDump(Function<T,String> symbolToString) {
+        final StringBuilder sb = new StringBuilder();
+        dump(sb, symbolToString);
+        return sb.toString();        
+    }
+    
+    @Override
+    public String toString() {
+        return toStringDump(x -> x.toString());
+    }
+
+    private static void printIndent(StringBuilder sb, int indent) {
+        for(int i = 0; i < indent; i++) {
+            sb.append(' ');
+        }
+    }
+    
+    
 }

@@ -3,11 +3,13 @@ package fr.an.util.encoder.huffman;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import java.util.function.Function;
 
 import fr.an.util.bits.BitInputStream;
@@ -53,7 +55,14 @@ public class HuffmanTable<T> {
 		return symbolLeafMap.size();
 	}
 	
-
+	public Set<T> getSymbols() {
+	    Set<T> res = new HashSet<T>();
+	    for(HuffmanTreeLeaf<T> node : symbolLeafMap.values()) {
+	        res.add(node.getSymbol());
+	    }
+	    return res;
+	}
+	
     public static class MutableInt {
         public int value;
     }

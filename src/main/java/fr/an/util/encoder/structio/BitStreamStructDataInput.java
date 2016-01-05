@@ -11,7 +11,7 @@ import fr.an.util.bits.RuntimeIOException;
  * 
  * cf similar java.io.DataInputStream (where underlying stream is a stream of bytes, instead of bits)
  */
-public class BitStreamStructDataInput implements StructDataInput {
+public class BitStreamStructDataInput extends BitInputStream implements StructDataInput {
 
     private BitInputStream in;
     
@@ -22,6 +22,25 @@ public class BitStreamStructDataInput implements StructDataInput {
     }
 
     // ------------------------------------------------------------------------
+
+
+    @Override
+    public void close() {
+        if (in != null) {
+            in.close();
+            this.in = null;
+        }
+    }
+
+    @Override
+    public boolean hasMoreBit() {
+        return in.hasMoreBit();
+    }
+
+    @Override
+    public int readBits(int readBitsCounts) {
+        return in.readBits(readBitsCounts);
+    }
     
     public boolean readBit() {
         return in.readBit();
@@ -79,5 +98,35 @@ public class BitStreamStructDataInput implements StructDataInput {
             throw new RuntimeIOException("readUTF", e);
         }
     }
-    
+
+    public int readUIntLtMinElseMax(int min, int max) {
+        int res;
+        boolean ltMin = readBit();
+        if (ltMin) {
+            res = readIntMinMax(0, min);
+        } else {
+            res = readIntMinMax(min, max);
+        }
+        return res;
+    }
+
+    public int readUIntLt16ElseMax(int max) {
+        return readUIntLtMinElseMax(16, max);
+    }
+
+    public int readUIntLt2048ElseMax(int max) {
+        return readUIntLtMinElseMax(2048, max);
+    }
+
+    public int readUInt0ElseMax(int max) {
+        int res;
+        boolean is0 = readBit();
+        if (is0) {
+            res = 0;
+        } else {
+            res = readIntMinMax(1, max);
+        }
+        return res;
+    }
+
 }

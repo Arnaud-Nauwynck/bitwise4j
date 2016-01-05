@@ -19,7 +19,9 @@ public final class Pow2Utils {
     }
 
     public static int valueToUpperLog2(int value) {
-        if (value < 0) throw new IllegalArgumentException();
+        if (value < 0) {
+            throw new IllegalArgumentException();
+        }
         if (value < 1024) {
             return INTS1024_TO_UPPERLOG2[value];
         } else {

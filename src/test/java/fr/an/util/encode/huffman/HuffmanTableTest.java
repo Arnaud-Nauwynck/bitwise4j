@@ -169,7 +169,7 @@ public class HuffmanTableTest {
         List<Integer> res = new ArrayList<Integer>();
         // Perform
         while(bIn.hasMoreBit()) {
-            Integer symbol = sut.readDecodeSymbol(bIn);
+            Integer symbol = sut.readBitsDecodeSymbol(bIn);
             res.add(symbol);
         }
         // Post-check

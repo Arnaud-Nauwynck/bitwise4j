@@ -31,7 +31,7 @@ public final class Pow2Utils {
 
     private static int doValueToUpperLog2(int value) {
         int pow = 0;
-        for(int remain = value; remain != 0; remain = remain >>> 1) {
+        for(int remain = value-1; remain != 0; remain = remain >>> 1) {
             pow++;
         }
         return pow;

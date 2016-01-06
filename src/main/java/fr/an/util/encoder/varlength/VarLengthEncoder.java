@@ -47,7 +47,7 @@ public class VarLengthEncoder {
 	public void close() {
 		try {
 			output.close();
-		} catch(IOException ioex) {
+		} catch(Exception ioex) {
 			throw new RuntimeException(ioex);
 		}
 		output = null;

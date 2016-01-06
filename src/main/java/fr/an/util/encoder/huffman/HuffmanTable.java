@@ -15,6 +15,7 @@ import java.util.function.Function;
 import fr.an.util.bits.BitInputStream;
 import fr.an.util.bits.BitOutputStream;
 import fr.an.util.encoder.structio.BitStreamStructDataOutput;
+import fr.an.util.encoder.structio.StructDataOutput;
 import fr.an.util.encoder.structio.Value2StructDataOutputWriter;
 
 /**
@@ -136,13 +137,14 @@ public class HuffmanTable<T> {
 	    code.writeCodeTo(out);
 	}
 
-	// idem, using BitStreamStructDataOutput
-	public void writeEncodeSymbol(BitStreamStructDataOutput out, T symbol) {
+	// idem, using StructDataOutput  (useless as StructDataOutput now extends from BitOutputStream) 
+	public void writeEncodeSymbol(StructDataOutput out, T symbol) {
         HuffmanBitsCode code = getSymbolCode(symbol);
-        code.writeCodeTo(out);
+        out.writeHuffmanCode(code);
     }
 
-	public T readDecodeSymbol(BitInputStream in) {
+	// cf StructDataInput instead ... 
+	public T readBitsDecodeSymbol(BitInputStream in) {
 	    T res;
 	    HuffmanTreeNode<T> node = getRootNode();
 	    for(;;) {
@@ -157,7 +159,25 @@ public class HuffmanTable<T> {
 	    }
 	    return res;
 	}
-	
+
+   public T readDecodeSymbol(boolean[] bits) {
+        T res;
+        HuffmanTreeNode<T> node = getRootNode();
+        int i = 0;
+        for(;;) {
+            boolean bit = bits[i++];
+            AbstractHuffmanNode<T> childNode = node.getChildLeftRight(bit);
+            if (childNode instanceof HuffmanTreeLeaf) {
+                res = ((HuffmanTreeLeaf<T>) childNode).getSymbol();
+                break;
+            } else {
+                node = (HuffmanTreeNode<T>) childNode;
+            }
+        }
+        return res;
+    }
+
+   
 	public void compute() {
 	    if (symbolLeafMap.size() <= 1) {
 	        // degenerated table
@@ -217,7 +237,7 @@ public class HuffmanTable<T> {
     }
 
     
-    public void writeEncode(BitStreamStructDataOutput bitsStructOutput, final int maxSymbolCount,
+    public void writeEncode(StructDataOutput bitsStructOutput, final int maxSymbolCount,
             Value2StructDataOutputWriter<T> symbolWriter) {
         bitsStructOutput.writeUIntLt16ElseMax(maxSymbolCount, getSymbolCount());
         final int maxCodeBitLen = getMaxCodeBitLen();

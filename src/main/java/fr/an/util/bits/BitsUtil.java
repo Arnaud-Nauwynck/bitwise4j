@@ -21,6 +21,25 @@ public class BitsUtil {
 		return res.toString();
 	}
 	
+	public static String bitsToString(int count, int bitsValue) {
+	    StringBuilder sb = new StringBuilder(count);
+	    for (int i = count-1; i >= 0; i--) {
+	        boolean bit = 0 != (bitsValue & (1 << i));
+	        sb.append(bit? '1' : '0');
+	    }
+	    return sb.toString();
+	}
+
+	public static int stringToBits(String str) {
+	    int res = 0;
+	    for (int i = 0; i < str.length(); i++) {
+            char ch = str.charAt(i);
+            int bit = (ch != '0')? 1 : 0;
+            res = res << 1 | bit;
+        }
+	    return res;
+	}
+
 	public  static byte[] booleansToBytes(boolean[] p) {
 			byte[] res;
 			final int len = p.length;

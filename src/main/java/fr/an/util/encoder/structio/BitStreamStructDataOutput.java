@@ -5,13 +5,14 @@ import java.io.IOException;
 
 import fr.an.util.bits.BitOutputStream;
 import fr.an.util.bits.RuntimeIOException;
+import fr.an.util.encoder.huffman.HuffmanBitsCode;
 
 /**
  * implements StructDataOutput using underlying BitOutputStream
  * 
  * cf similar java.io.DataOutputStream (where underlying stream is a stream of bytes, instead of bits)
  */
-public class BitStreamStructDataOutput implements StructDataOutput {
+public class BitStreamStructDataOutput extends StructDataOutput {
 
     private BitOutputStream out;
     
@@ -23,19 +24,31 @@ public class BitStreamStructDataOutput implements StructDataOutput {
 
     // ------------------------------------------------------------------------
     
+    @Override
+    public void close() {
+        if (out != null) {
+            out.close();
+            out = null;
+        }
+    }
+
+    @Override
     public void writeBit(boolean value) {
         out.writeBit(value);
     }
 
+    @Override
     public void writeNBits(int count, int bitsValue) {
         out.writeNBits(count, bitsValue); // warn: swap param order
     }
     
+    @Override
     public void writeUInt0N(int maxNExclusive, int value) {
         int nBits = Pow2Utils.valueToUpperLog2(maxNExclusive);
         writeNBits(nBits, value);
     }
     
+    @Override
     public void writeIntMinMax(int fromMin, int toMax, int value) {
         int offsetValue = value - fromMin;
         int maxAmplitude = toMax - fromMin;
@@ -43,27 +56,33 @@ public class BitStreamStructDataOutput implements StructDataOutput {
         writeNBits(nBits, offsetValue);
     }
 
+    @Override
     public void writeByte(byte value) {
         out.write(value);
     }
     
+    @Override
     public void writeBytes(byte[] dest, int len) {
         writeBytes(dest, 0, len);
     }
     
+    @Override
     public void writeBytes(byte[] dest, int offset, int len) {
         out.writeBytes(dest, offset, len);
     }
     
+    @Override
     public void writeInt(int value) {
         writeNBits(32, value);
     }
     
+    @Override
     public void writeFloat(float value) {
         int tmpBits32 = Float.floatToIntBits(value);
         writeNBits(32, tmpBits32);
     }
     
+    @Override
     public void writeDouble(double value) {
         long bits64 = Double.doubleToLongBits(value);
         int tmp1 = (int) (bits64 >>> 32);
@@ -73,6 +92,7 @@ public class BitStreamStructDataOutput implements StructDataOutput {
     }
 
     // cf java.io.DataOutputStream
+    @Override
     public void writeUTF(String value) {
         DataOutputStream din = new DataOutputStream(out);
         try {
@@ -82,8 +102,12 @@ public class BitStreamStructDataOutput implements StructDataOutput {
         }
     }
     
-    
+    @Override
+    public void writeHuffmanCode(HuffmanBitsCode code) {
+        writeNBits(code.getBitsCount(), code.getBits());
+    }
 
+    @Override
     public void writeUIntLtMinElseMax(int min, int max, int value) {
         if (value < min) {
             writeBit(true);
@@ -94,14 +118,17 @@ public class BitStreamStructDataOutput implements StructDataOutput {
         }
     }
 
+    @Override
     public void writeUIntLt16ElseMax(int max, int value) {
         writeUIntLtMinElseMax(16, max, value);
     }
 
+    @Override
     public void writeUIntLt2048ElseMax(int max, int value) {
         writeUIntLtMinElseMax(2048, max, value);
     }
 
+    @Override
     public void writeUInt0ElseMax(int max, int value) {
         if (value == 0) {
             writeBit(true);

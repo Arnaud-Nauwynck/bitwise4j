@@ -8,6 +8,9 @@ import java.io.OutputStream;
  */
 public abstract class BitOutputStream extends OutputStream {
 
+    // override without the annoying "throws IOException" 
+    public abstract void close();
+    
 	/**
 	 * Write a single bit to the stream
 	 */

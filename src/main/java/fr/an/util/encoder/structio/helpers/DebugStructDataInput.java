@@ -1,4 +1,4 @@
-package fr.an.util.encoder.structio;
+package fr.an.util.encoder.structio.helpers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 import fr.an.util.bits.BitsUtil;
 import fr.an.util.bits.RuntimeIOException;
 import fr.an.util.encoder.huffman.HuffmanTable;
+import fr.an.util.encoder.structio.Pow2Utils;
+import fr.an.util.encoder.structio.StructDataInput;
 
 /**
  * implements StructDataInput using underlying Debug text InputStream, with 1 instruction per line

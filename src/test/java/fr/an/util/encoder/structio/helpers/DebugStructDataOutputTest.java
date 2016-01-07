@@ -1,10 +1,12 @@
-package fr.an.util.encoder.structio;
+package fr.an.util.encoder.structio.helpers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import fr.an.util.encoder.structio.helpers.DebugStructDataOutput;
 
 public class DebugStructDataOutputTest {
 

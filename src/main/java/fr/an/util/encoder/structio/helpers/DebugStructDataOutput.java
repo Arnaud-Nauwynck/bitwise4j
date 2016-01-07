@@ -1,4 +1,4 @@
-package fr.an.util.encoder.structio;
+package fr.an.util.encoder.structio.helpers;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +8,8 @@ import fr.an.util.bits.BitsUtil;
 import fr.an.util.bits.CounterOuputStream;
 import fr.an.util.bits.RuntimeIOException;
 import fr.an.util.encoder.huffman.HuffmanBitsCode;
+import fr.an.util.encoder.structio.Pow2Utils;
+import fr.an.util.encoder.structio.StructDataOutput;
 
 /**
  * implements StructDataOutput using underlying Debug text OutputStream, with 1 instruction per line

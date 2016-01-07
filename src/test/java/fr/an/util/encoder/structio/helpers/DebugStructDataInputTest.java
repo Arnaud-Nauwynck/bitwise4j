@@ -1,10 +1,12 @@
-package fr.an.util.encoder.structio;
+package fr.an.util.encoder.structio.helpers;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import fr.an.util.encoder.structio.helpers.DebugStructDataInput;
 
 public class DebugStructDataInputTest {
 

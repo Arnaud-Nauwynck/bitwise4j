@@ -167,7 +167,7 @@ public class DebugStructDataInput extends StructDataInput {
         String tmpValue = readlnIncrInstructionValue(nBits, "bytes", null);
         Scanner scanner = new Scanner(tmpValue);
         for(int i = 0; i < len; i++) {
-            dest[i] = (byte) scanner.nextInt();
+            dest[offset+i] = (byte) scanner.nextInt();
         }
         scanner.close();
     }
@@ -177,7 +177,18 @@ public class DebugStructDataInput extends StructDataInput {
         String tmpValue = readlnIncrInstructionValue(32, "int", null);
         return Integer.parseInt(tmpValue);
     }
-    
+
+    @Override
+    public void readInts(int[] dest, int offset, int len) {
+        int nBits = 32 * len;
+        String tmpValue = readlnIncrInstructionValue(nBits, "ints", null);
+        Scanner scanner = new Scanner(tmpValue);
+        for(int i = 0; i < len; i++) {
+            dest[offset+i] = scanner.nextInt();
+        }
+        scanner.close();
+    }
+
     @Override
     public float readFloat() {
         String tmpValue = readlnIncrInstructionValue(32, "float", null);

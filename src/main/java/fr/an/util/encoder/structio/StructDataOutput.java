@@ -23,6 +23,7 @@ public abstract class StructDataOutput extends BitOutputStream {
     public abstract void writeBytes(byte[] dest, int offset, int len);
     
     public abstract void writeInt(int value);
+    public abstract void writeInts(int[] values, int offset, int len);
     public abstract void writeFloat(float value);
     public abstract void writeDouble(double value);
 

@@ -79,12 +79,22 @@ public class BitStreamStructDataInput extends StructDataInput {
         readBytes(dest, 0, len);
     }
     
+    @Override
     public void readBytes(byte[] dest, int offset, int len) {
         in.readBytes(dest, offset, len);
     }
     
+    @Override
     public int readInt() {
         return readBits(32);
+    }
+    
+    @Override
+    public void readInts(int[] dest, int offset, int len) {
+        final int maxI = offset + len;
+        for (int i = offset; i < maxI; i++) {
+            dest[i] = readInt();
+        }
     }
     
     @Override

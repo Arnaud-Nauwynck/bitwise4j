@@ -77,6 +77,14 @@ public class BitStreamStructDataOutput extends StructDataOutput {
     }
     
     @Override
+    public void writeInts(int[] values, int offset, int len) {
+        final int maxI = offset + len;
+        for(int i = offset; i < maxI; i++) {
+            writeInt(values[i]);
+        }
+    }
+    
+    @Override
     public void writeFloat(float value) {
         int tmpBits32 = Float.floatToIntBits(value);
         writeNBits(32, tmpBits32);

@@ -25,6 +25,7 @@ public abstract class StructDataInput extends BitInputStream {
     public abstract void readBytes(byte[] dest, int len);
     public abstract void readBytes(byte[] dest, int offset, int len);
     public abstract int readInt();
+    public abstract void readInts(int[] dest, int offset, int len);
     public abstract float readFloat();
     public abstract double readDouble();
 

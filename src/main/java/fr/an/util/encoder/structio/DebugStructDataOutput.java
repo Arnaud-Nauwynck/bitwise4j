@@ -19,6 +19,8 @@ public class DebugStructDataOutput extends StructDataOutput {
     
     private int count = 0;
     
+    private int countInstrLine;
+    
     // ------------------------------------------------------------------------
 
     public DebugStructDataOutput(PrintStream out) {
@@ -41,6 +43,7 @@ public class DebugStructDataOutput extends StructDataOutput {
 
     protected void printIncr(int incr, String text) {
         count += incr;
+        countInstrLine++;
         print("[" + incr + " : " + count + "] " + text);
     }
 
@@ -73,7 +76,7 @@ public class DebugStructDataOutput extends StructDataOutput {
     @Override
     public void writeIntMinMax(int fromMin, int toMax, int value) {
         int nBits = countBitsIntMinMax(fromMin, toMax);
-        printlnIncr(nBits, "intMinMax(" + fromMin + "," + toMax + "): " + value);
+        printlnIncr(nBits, "intMinMax(" + fromMin + ", " + toMax + "): " + value);
     }
 
     private int countBitsIntMinMax(int fromMin, int toMax) {
@@ -95,9 +98,10 @@ public class DebugStructDataOutput extends StructDataOutput {
     @Override
     public void writeBytes(byte[] dest, int offset, int len) {
         printIncr(8*len, "bytes: ");
-        for(int i = offset; i < offset+len; i++) {
+        final int maxI = offset+len;
+        for(int i = offset; i < maxI; i++) {
             out.print((int) dest[i]);
-            if (i + 1 < offset+len) {
+            if ((i + 1) < maxI) {
                 print(" ");
             }
         }

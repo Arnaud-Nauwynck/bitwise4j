@@ -1,13 +1,18 @@
 package fr.an.util.encoder.huffman;
 
+import java.io.Serializable;
+
 import fr.an.util.bits.BitOutputStream;
 import fr.an.util.encoder.structio.StructDataOutput;
 
 /**
  * 
  */
-public class HuffmanBitsCode {
+public class HuffmanBitsCode implements Serializable {
 
+    /** */
+    private static final long serialVersionUID = 1L;
+    
 	private static HuffmanBitsCode rootEmptyCode = new HuffmanBitsCode(0, 0);
 	
 	private final int bits;

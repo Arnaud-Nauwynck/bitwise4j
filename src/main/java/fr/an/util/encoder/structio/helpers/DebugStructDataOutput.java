@@ -19,9 +19,9 @@ public class DebugStructDataOutput extends StructDataOutput {
 
     private PrintStream out;
     
-    private int count = 0;
+    private int countBits = 0;
     
-    private int countInstrLine;
+    private int countInstrs;
     
     // ------------------------------------------------------------------------
 
@@ -31,10 +31,14 @@ public class DebugStructDataOutput extends StructDataOutput {
 
     // ------------------------------------------------------------------------
 
-    public int getCountInstrLine() {
-        return countInstrLine;
+    public int getCountBits() {
+        return countBits;
     }
-
+    
+    public int getCountInstrs() {
+        return countInstrs;
+    }
+    
     protected void print(String text) {
         out.print(text);
     }
@@ -47,14 +51,14 @@ public class DebugStructDataOutput extends StructDataOutput {
         out.println();
     }
 
-    protected void printIncr(int incr, String text) {
-        count += incr;
-        countInstrLine++;
-        print("[" + incr + " : " + count + "] " + text);
+    protected void printIncr(int incrCountBits, String text) {
+        countBits += incrCountBits;
+        countInstrs++;
+        print("[" + incrCountBits + " : " + countBits + "] " + text);
     }
 
-    protected void printlnIncr(int incr, String text) {
-        printIncr(incr, text);
+    protected void printlnIncr(int incrCountBits, String text) {
+        printIncr(incrCountBits, text);
         println();
     }
 
@@ -124,7 +128,7 @@ public class DebugStructDataOutput extends StructDataOutput {
 
     @Override
     public void writeInts(int[] values, int offset, int len) {
-        printlnIncr(32*len, "ints: ");
+        printIncr(32*len, "ints: ");
         final int maxI = offset + len;
         for(int i = offset; i < maxI; i++) {
             out.print(values[i]);

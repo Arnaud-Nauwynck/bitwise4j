@@ -42,13 +42,18 @@ public class BitStreamStructDataInput extends StructDataInput {
     }
 
     @Override
-    public int readBits(int readBitsCounts) {
-        return in.readBits(readBitsCounts);
+    public void readSkipPaddingTo8() {
+        in.readSkipPaddingTo8();
     }
-    
+
     @Override
     public boolean readBit() {
         return in.readBit();
+    }
+
+    @Override
+    public int readBits(int readBitsCounts) {
+        return in.readBits(readBitsCounts);
     }
 
     @Deprecated

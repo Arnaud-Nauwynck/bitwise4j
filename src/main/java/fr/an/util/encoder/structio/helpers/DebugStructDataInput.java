@@ -137,6 +137,12 @@ public class DebugStructDataInput extends StructDataInput {
     }
     
     @Override
+    public void readSkipPaddingTo8() {
+        int skipModulo = 8 - count % 8;
+        readlnIncrInstructionValue(skipModulo, "skipPaddingTo8", null);
+    }
+    
+    @Override
     public int readUInt0N(int maxNExclusive) {
         int nBits = Pow2Utils.valueToUpperLog2(maxNExclusive);
         String tmpValue = readlnIncrInstructionValue(nBits, "uint0N", "" + maxNExclusive);

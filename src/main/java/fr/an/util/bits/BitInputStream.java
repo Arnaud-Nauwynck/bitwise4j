@@ -17,6 +17,8 @@ public abstract class BitInputStream extends java.io.InputStream {
 	 */
 	public abstract boolean readBit();
 	
+	public abstract void readSkipPaddingTo8();
+	
 	/**
 	 * Read a specified number of bits (<=32) and return them as an int value.
 	 */
@@ -34,14 +36,17 @@ public abstract class BitInputStream extends java.io.InputStream {
 	 * @param len
 	 */
 	public void readBytes(byte[] dest, int offset, int len) {
-	    int tmpres;
-	    try {
-            tmpres = read(dest, offset, len);
-        } catch (IOException ex) {
-            throw new RuntimeIOException("readFully", ex);
-        }
-	    if (tmpres != len) {
-	        throw new EOFRuntimeException();
+	    int remainLen = len;
+	    int pos = offset;
+	    while(remainLen > 0) {
+    	    int tmpres;
+    	    try {
+                tmpres = read(dest, pos, remainLen);
+            } catch (IOException ex) {
+                throw new RuntimeIOException("readFully", ex);
+            }
+    	    remainLen -= tmpres;
+    	    pos += tmpres;
 	    }
 	}
 }

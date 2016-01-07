@@ -1,7 +1,6 @@
 package fr.an.util.encoder.structio;
 
 import fr.an.util.bits.BitInputStream;
-import fr.an.util.encoder.huffman.HuffmanBitsCode;
 import fr.an.util.encoder.huffman.HuffmanTable;
 
 /**

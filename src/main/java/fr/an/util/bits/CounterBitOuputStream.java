@@ -51,6 +51,16 @@ public class CounterBitOuputStream extends BitOutputStream {
 		incrCount(count);
 	}
 
+    @Override
+	public void write(int value) {
+	    incrCount(8);
+	}
+	
+    @Override
+	public void writeBytes(byte[] src, int offset, int len) {
+	    incrCount(len * 8);
+	}
+	
 	// override java.lang.Object
 	// ------------------------------------------------------------------------
 	

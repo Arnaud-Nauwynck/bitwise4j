@@ -90,6 +90,12 @@ public class InputStreamToBitInputStream extends BitInputStream {
 		
 	}
 
+	@Override
+	public void readSkipPaddingTo8() {
+	    bitsBuffer = 0;
+	    bitsBufferLen = 0;
+	}
+
     private void fetchReadByte() {
         if (bitsBufferLen == 0) {
             bitsBuffer = readTargetByte();
@@ -154,11 +160,17 @@ public class InputStreamToBitInputStream extends BitInputStream {
             if (super.available() > 0) {
                 return true;
             }
-            fetchReadByte();
         } catch(IOException ex) {
             throw new RuntimeIOException("hasMoreBit", ex);
         }
-        return bitsBufferLen > 0;
+        // fetchReadByte();
+        bitsBuffer = readTargetByte();
+        if (bitsBuffer == -1) {
+            return false;
+        } else {
+            bitsBufferLen = 8;
+            return true;
+        }
     }
     
     @Override

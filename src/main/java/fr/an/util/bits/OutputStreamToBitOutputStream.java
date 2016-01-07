@@ -58,6 +58,9 @@ public class OutputStreamToBitOutputStream extends BitOutputStream {
      */
     public void flush() {
         if (bitsBufferLen > 0) {
+            // TOCHECK PADDING??? 
+            bitsBuffer <<= (8-bitsBufferLen);
+            
             writeTargetByte(bitsBuffer);
             bitsBufferLen = 0;
             bitsBuffer = 0;

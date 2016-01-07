@@ -73,6 +73,20 @@ public class BooleanArrayQueue {
 			return res;
 		}
 		
+		@Override
+		public void readSkipPaddingTo8() {
+		    int size = buffer.size();
+		    if (size > 0) {
+		        int skipCount = buffer.size() % 8;
+		        if (skipCount != 0) {
+		            for (int i = 0; i < skipCount; i++) {
+		                buffer.remove(0);
+		            }
+		        }
+		    }
+		}
+
+		  
 	}
 
 	private class InnerBitOutputStream extends BitOutputStream {

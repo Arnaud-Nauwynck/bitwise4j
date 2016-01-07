@@ -1,6 +1,7 @@
 package fr.an.util.encoder.structio.helpers;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import fr.an.util.encoder.huffman.HuffmanTable;
 import fr.an.util.encoder.structio.StructDataInput;
@@ -30,6 +31,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return new RuntimeException("Failed at line " + countInstr + ": " + msg);
     }
 
+    @Override
     public int read() {
         countInstr++;
         int res1 = in1.read();
@@ -38,12 +40,13 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
-
+    @Override
     public void close() {
         in1.close();
         in2.close();
     }
 
+    @Override
     public boolean hasMoreBit() {
         boolean res1 = in1.hasMoreBit();
         boolean res2 = in2.hasMoreBit();
@@ -51,6 +54,13 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
+    public void readSkipPaddingTo8() {
+        in1.readSkipPaddingTo8();
+        in2.readSkipPaddingTo8();
+    }
+    
+    @Override
     public boolean readBit() {
         countInstr++;
         boolean res1 = in1.readBit();
@@ -59,6 +69,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public int readBits(int count) {
         countInstr++;
         int res1 = in1.readBits(count);
@@ -67,6 +78,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public int readUInt0N(int maxN) {
         countInstr++;
         int res1 = in1.readUInt0N(maxN);
@@ -75,6 +87,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public int readIntMinMax(int fromMin, int toMax) {
         countInstr++;
         int res1 = in1.readIntMinMax(fromMin, toMax);
@@ -83,6 +96,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public byte readByte() {
         countInstr++;
         byte res1 = in1.readByte();
@@ -91,21 +105,28 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public void readBytes(byte[] dest, int len) {
         countInstr++;
         readBytes(dest, 0, len);
     }
 
+    @Override
     public void readBytes(byte[] dest, int offset, int len) {
         countInstr++;
         in1.readBytes(dest, offset, len);
         byte[] b2 = new byte[len];
         in2.readBytes(b2, 0, len);
-        if (arrayCompare(dest, offset, b2, 0, len)) {
-            throw failEx("readByte() " + dest + " != " + b2);
+        int foundDiffI1 = arrayFindFirstDiff(dest, offset, b2, 0, len);
+        if (foundDiffI1 != -1) {
+            byte elt1 = dest[foundDiffI1];
+            byte elt2 = b2[foundDiffI1-offset];
+            throw failEx("readByte() " + " [" + foundDiffI1 + "] " + elt1 + " != " + elt2 
+                    + ", detailed arrays: " + Arrays.toString(dest) + " != " + Arrays.toString(b2));
         }
     }
 
+    @Override
     public int readInt() {
         countInstr++;
         int res1 = in1.readInt();
@@ -128,6 +149,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         }
     }
 
+    @Override
     public float readFloat() {
         countInstr++;
         float res1 = in1.readFloat();
@@ -136,6 +158,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public double readDouble() {
         countInstr++;
         double res1 = in1.readDouble();
@@ -144,6 +167,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public String readUTF() {
         countInstr++;
         String res1 = in1.readUTF();
@@ -152,6 +176,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public <T> T readDecodeHuffmanCode(HuffmanTable<T> table) {
         countInstr++;
         T res1 = in1.readDecodeHuffmanCode(table);
@@ -160,6 +185,7 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public int readUIntLtMinElseMax(int min, int max) {
         countInstr++;
         int res1 = in1.readUIntLtMinElseMax(min, max);
@@ -168,14 +194,17 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public int readUIntLt16ElseMax(int max) {
         return readUIntLtMinElseMax(16, max);
     }
 
+    @Override
     public int readUIntLt2048ElseMax(int max) {
         return readUIntLtMinElseMax(2048, max);
     }
 
+    @Override
     public int readUInt0ElseMax(int max) {
         countInstr++;
         int res1 = in1.readUInt0ElseMax(max);
@@ -184,23 +213,19 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
-    public int read(byte[] b) throws IOException {
+    @Override
+    public int read(byte[] b) {
         countInstr++;
         return read(b, 0, b.length);
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
-        countInstr++;
-        int res1 = in1.read(b, off, len);
-        byte[] b2 = new byte[len];
-        int res2 = in2.read(b, 0, len);
-        if (res1 != res2) throw failEx("read(" + off + ", " + len + ") " + res1 + " != " + res2);
-        if (! arrayCompare(b, off, b2, 0, len)) {
-            throw failEx("read(" + off + ", " + len + ") " + res1 +  "!= " + res2);
-        }
-        return res1;
+    @Override
+    public int read(byte[] b, int off, int len) {
+        readBytes(b, off, len);
+        return len;
     }
 
+    @Override
     public long skip(long n) throws IOException {
         countInstr++;
         long res1 = in1.skip(n);
@@ -209,21 +234,25 @@ public class DebugTeeStructDataInput extends StructDataInput {
         return res1;
     }
 
+    @Override
     public int available() throws IOException {
         // DO NOT check?
         return in1.available();
     }
 
+    @Override
     public void mark(int readlimit) {
         in1.mark(readlimit);
         in2.mark(readlimit);
     }
 
+    @Override
     public void reset() throws IOException {
         in1.reset();
         in2.reset();
     }
 
+    @Override
     public boolean markSupported() {
         return in1.markSupported() && in2.markSupported();
     }
@@ -234,17 +263,15 @@ public class DebugTeeStructDataInput extends StructDataInput {
     public String toString() {
         return "DebugTeeStructDataInput [countInstr=" + countInstr + "]";
     }
-
     
-    
-    private static boolean arrayCompare(byte[] src1, int offset1, byte[] src2, int offset2, int len) {
+    private static int arrayFindFirstDiff(byte[] src1, int offset1, byte[] src2, int offset2, int len) {
         final int maxI1 = offset1 + len;
         for(int i1 = offset1, i2 = offset2; i1 < maxI1; i1++,i2++) {
             if (src1[i1] != src2[i2]) {
-                return false;
+                return i1;
             }
         }
-        return true;
+        return -1;
     }
 
     private static int arrayFindFirstDiff(int[] src1, int offset1, int[] src2, int offset2, int len) {

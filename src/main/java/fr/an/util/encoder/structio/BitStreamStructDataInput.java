@@ -25,9 +25,6 @@ public class BitStreamStructDataInput extends StructDataInput {
         this.in = target;
     }
 
-    // ------------------------------------------------------------------------
-
-
     @Override
     public void close() {
         if (in != null) {
@@ -35,7 +32,25 @@ public class BitStreamStructDataInput extends StructDataInput {
             this.in = null;
         }
     }
+    
+    // ------------------------------------------------------------------------
 
+    @Override
+    public String getCurrStream() {
+        if (in instanceof IStreamMultiplexerSupport) {
+            return ((IStreamMultiplexerSupport) in).getCurrStream();
+        }
+        return null;
+    }
+    
+    @Override
+    public String setCurrStream(String name) {
+        if (in instanceof IStreamMultiplexerSupport) {
+            return ((IStreamMultiplexerSupport) in).setCurrStream(name);
+        }
+        return null;
+    }
+    
     @Override
     public boolean hasMoreBit() {
         return in.hasMoreBit();

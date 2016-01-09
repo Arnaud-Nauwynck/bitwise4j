@@ -9,7 +9,7 @@ import fr.an.util.encoder.huffman.HuffmanTable;
  * 
  * implementation note: use abstract class instead of interface ... for performance
  */
-public abstract class StructDataInput extends BitInputStream {
+public abstract class StructDataInput extends BitInputStream implements IStreamMultiplexerSupport {
 
     public abstract void close();
     public abstract boolean hasMoreBit();
@@ -36,8 +36,5 @@ public abstract class StructDataInput extends BitInputStream {
     public abstract int readUIntLt16ElseMax(int max);
     public abstract int readUIntLt2048ElseMax(int max);
     public abstract int readUInt0ElseMax(int max);
-        
-    // TODO
-    // public abstract int readIntHuffman(HuffmanTable table);
     
 }

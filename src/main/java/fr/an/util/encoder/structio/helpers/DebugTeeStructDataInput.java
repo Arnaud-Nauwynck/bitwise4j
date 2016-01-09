@@ -24,11 +24,29 @@ public class DebugTeeStructDataInput extends StructDataInput {
         this.in1 = in1;
         this.in2 = in2;
     }
-    
+
+    @Override
+    public void close() {
+        in1.close();
+        in2.close();
+    }
+
     // ------------------------------------------------------------------------
 
     private RuntimeException failEx(String msg) {
         return new RuntimeException("Failed at line " + countInstr + ": " + msg);
+    }
+    
+    @Override
+    public String getCurrStream() {
+        return in1.getCurrStream();
+    }
+
+    @Override
+    public String setCurrStream(String name) {
+        String prev = in1.setCurrStream(name);
+        in2.setCurrStream(name);
+        return prev;
     }
 
     @Override
@@ -38,12 +56,6 @@ public class DebugTeeStructDataInput extends StructDataInput {
         int res2 = in2.read();
         if (res1 != res2) throw failEx("read() " + res1 + " != " + res2);
         return res1;
-    }
-
-    @Override
-    public void close() {
-        in1.close();
-        in2.close();
     }
 
     @Override

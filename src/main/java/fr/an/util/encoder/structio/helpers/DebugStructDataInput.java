@@ -18,22 +18,22 @@ import fr.an.util.encoder.structio.StructDataInput;
  */
 public class DebugStructDataInput extends StructDataInput {
 
-    private static final Pattern INSTRUCTION_LINE_PATTERN = Pattern.compile("\\[(\\d+) : (\\d+)\\] (\\w+)(\\(([^:]*)\\))?: (.*)"); 
+    private static final Pattern INSTRUCTION_LINE_PATTERN = 
+            Pattern.compile("[^:]*:(\\d+):(\\d+)/\\d+:\\d+/\\d+:(\\w+)(\\(([^:]*)\\))?: (.*)"); 
 
     private BufferedReader in;
     private String readAheadLine;
     
-    private int count;
-    
-    private int instrLineCount;
+    private String currStream = "";
+
+    private int lineCount;
+    private CounterPerStream counters = new CounterPerStream();
     
     // ------------------------------------------------------------------------
 
     public DebugStructDataInput(BufferedReader target) {
         this.in = target;
     }
-
-    // ------------------------------------------------------------------------
 
     @Override
     public void close() {
@@ -45,7 +45,22 @@ public class DebugStructDataInput extends StructDataInput {
             this.in = null;
         }
     }
+    
+    // ------------------------------------------------------------------------
 
+    @Override
+    public String getCurrStream() {
+        return currStream;
+    }
+    
+    @Override
+    public String setCurrStream(String name) {
+        String prev = currStream;
+        counters.setCurrStream(name);
+        this.currStream = name;
+        return prev;
+    }
+    
     @Override
     public boolean hasMoreBit() {
         if (readAheadLine != null) {
@@ -53,6 +68,7 @@ public class DebugStructDataInput extends StructDataInput {
         }
         try {
             this.readAheadLine = in.readLine();
+            lineCount++;
         } catch (IOException e) {
             throw new RuntimeIOException("hasMoreBit", e);
         }
@@ -67,16 +83,24 @@ public class DebugStructDataInput extends StructDataInput {
         } else {
             try {
                 line = in.readLine();
+                lineCount++;
             } catch (IOException e) {
                 throw new RuntimeIOException("Failed", e);
             }
+            while(line.startsWith("#")) {
+                try {
+                    line = in.readLine();
+                    lineCount++;
+                } catch (IOException e) {
+                    throw new RuntimeIOException("Failed", e);
+                }
+            }
         }
-        instrLineCount++;
         return line;
     }
     
     protected RuntimeException failEx(String line, String text) {
-        throw new IllegalStateException("Failed to read at line " + instrLineCount + " '" + line + "', " + text);
+        throw new IllegalStateException("Failed to read at line " + lineCount + " '" + line + "', " + text);
     }
     
     protected String readlnIncrInstructionValue(int expectedNBits, String expectedInstructionName, String expectedParams) {
@@ -86,34 +110,37 @@ public class DebugStructDataInput extends StructDataInput {
             throw failEx(line, "expected line pattern " + INSTRUCTION_LINE_PATTERN + ", got '" + line + "'");
         }
         int nBits = Integer.parseInt(matcher.group(1));
+        int checkCount = Integer.parseInt(matcher.group(2));
+        String instr = matcher.group(3);
+        String params = matcher.group(5);
+        String value = matcher.group(6);
+
         if (expectedNBits > 0) {
             if (expectedNBits != nBits) {
                 throw failEx(line, "expected bits count " + expectedNBits + ", got '" + nBits + "'");
             }
         }
-        count += nBits;
-        int checkCount = Integer.parseInt(matcher.group(2));
-        if (checkCount != count) {
-            throw failEx(line, "expecting count: "+ checkCount + ", got: " + count);
+        int incrValueLen = (value != null && !instr.equals("comment"))? value.length() : 0; 
+        counters.incr(nBits, incrValueLen);
+
+        if (checkCount != counters.getCurrBitsCount()) {
+            throw failEx(line, "expecting count: "+ checkCount + ", got: " + counters.getCurrBitsCount());
         }
-        String instr = matcher.group(3);
         if (!expectedInstructionName.equals(instr)) {
             throw failEx(line, "expecting instr '" + expectedInstructionName + ", got: " + instr);
         }
         
-        String params = matcher.group(5);
         if (expectedParams != null && !expectedParams.equals(params)) {
             throw failEx(line, "expecting instr " + instr + " params ("+ expectedParams + "), got: (" + params + ")");
         }
-        String value = matcher.group(6);
         return value;
     }
 
     
     private void checkIncr(int prevCount, int nBits) {
         int checkCount = prevCount + nBits;
-        if (checkCount != count) {
-            throw failEx(null, "expecting bits count: "+ count  + ", got " + checkCount + "=" + prevCount + "+" + nBits);
+        if (checkCount != counters.getCurrBitsCount()) {
+            throw failEx(null, "expecting bits count: "+ counters.getCurrBitsCount() + ", got " + checkCount + "=" + prevCount + "+" + nBits);
         }
     }
 
@@ -138,7 +165,7 @@ public class DebugStructDataInput extends StructDataInput {
     
     @Override
     public void readSkipPaddingTo8() {
-        int skipModulo = 8 - count % 8;
+        int skipModulo = 8 - counters.getCurrBitsCount() % 8;
         readlnIncrInstructionValue(skipModulo, "skipPaddingTo8", null);
     }
     
@@ -226,7 +253,7 @@ public class DebugStructDataInput extends StructDataInput {
 
     @Override
     public int readUIntLtMinElseMax(int min, int max) {
-        int prevCount = count;
+        int prevCount = counters.getCurrBitsCount();
         String tmpValue = readlnIncrInstructionValue(-1, "uintLtMinElseMax", "" + min + ", " + max); // -1: size unknown while reading
         int res = Integer.parseInt(tmpValue);
         int nBits = 1;
@@ -251,7 +278,7 @@ public class DebugStructDataInput extends StructDataInput {
 
     @Override
     public int readUInt0ElseMax(int max) {
-        int prevCount = count;
+        int prevCount = counters.getCurrBitsCount();
         String tmpValue = readlnIncrInstructionValue(-1, "uint0ElseMax", "" + max); // -1: size unknown while reading
         int res = Integer.parseInt(tmpValue);
         int nBits = 1;

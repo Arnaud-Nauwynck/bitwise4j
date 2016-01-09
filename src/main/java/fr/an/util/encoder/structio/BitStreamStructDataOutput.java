@@ -33,6 +33,27 @@ public class BitStreamStructDataOutput extends StructDataOutput {
     }
 
     @Override
+    public void debugComment(String msg) {
+        // ignore!
+    }
+
+    @Override
+    public String getCurrStream() {
+        if (out instanceof IStreamMultiplexerSupport) {
+            return ((IStreamMultiplexerSupport) out).getCurrStream();
+        }
+        return null;
+    }
+    
+    @Override
+    public String setCurrStream(String name) {
+        if (out instanceof IStreamMultiplexerSupport) {
+            return ((IStreamMultiplexerSupport) out).setCurrStream(name);
+        }
+        return null;
+    }
+    
+    @Override
     public void writeBit(boolean value) {
         out.writeBit(value);
     }

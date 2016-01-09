@@ -19,9 +19,9 @@ public class DebugStructDataOutput extends StructDataOutput {
 
     private PrintStream out;
     
-    private int countBits = 0;
+    private String currStream = "";
     
-    private int countInstrs;
+    private CounterPerStream counters = new CounterPerStream();
     
     // ------------------------------------------------------------------------
 
@@ -29,58 +29,64 @@ public class DebugStructDataOutput extends StructDataOutput {
         this.out = out;
     }
 
-    // ------------------------------------------------------------------------
-
-    public int getCountBits() {
-        return countBits;
-    }
-    
-    public int getCountInstrs() {
-        return countInstrs;
-    }
-    
-    protected void print(String text) {
-        out.print(text);
-    }
-    
-    protected void println(String line) {
-        out.println(line);
-    }
-    
-    protected void println() {
-        out.println();
-    }
-
-    protected void printIncr(int incrCountBits, String text) {
-        countBits += incrCountBits;
-        countInstrs++;
-        print("[" + incrCountBits + " : " + countBits + "] " + text);
-    }
-
-    protected void printlnIncr(int incrCountBits, String text) {
-        printIncr(incrCountBits, text);
-        println();
-    }
-
     @Override
     public void close() {
         out.close();
     }
 
+    // ------------------------------------------------------------------------
+    
+    public CounterPerStream getCounters() {
+        return counters;
+    }
+        
+    protected void printlnInstr(int incrCountBits, String instr, int value) {
+        printlnInstr(incrCountBits, instr, Integer.toString(value));
+    }
+
+    protected void printlnInstr(int incrCountBits, String instr, String value) {
+        int incrValueLen = (value != null && !instr.equals("comment"))? value.length() : 0;
+        counters.incr(incrCountBits, incrValueLen);
+        out.print(currStream + ":" + incrCountBits
+            + ":" + counters.toColumnsString()
+            + ":" + instr + ": " + value + "\n");
+    }
+
+    // ------------------------------------------------------------------------
+    
+    @Override
+    public void debugComment(String msg) {
+        // printlnInstr(0, "comment", msg);
+        out.print("# " + msg + "\n");
+    }
+    
+    @Override
+    public String getCurrStream() {
+        return currStream;
+    }
+    
+    @Override
+    public String setCurrStream(String name) {
+        String prev = currStream;
+        counters.setCurrStream(name);
+        this.currStream = name;
+        return prev;
+    }
+    
     @Override
     public void writeBit(boolean value) {
-        printlnIncr(1, "bit: " + ((value)? "1" : "0"));
+        printlnInstr(1, "bit", ((value)? "1" : "0"));
     }
 
     @Override
     public void writeNBits(int count, int bitsValue) {
-        printlnIncr(count, "NBits: " + BitsUtil.bitsToString(count, bitsValue));
+        printlnInstr(count, "NBits", BitsUtil.bitsToString(count, bitsValue));
     }
     
     @Override
     public void writeUInt0N(int maxNExclusive, int value) {
         int nBits = Pow2Utils.valueToUpperLog2(maxNExclusive);
-        printlnIncr(nBits, "uint0N(" + maxNExclusive + "): " + value);
+        printlnInstr(nBits, "uint0N(" + maxNExclusive + ")", value);
     }
     
     @Override
@@ -89,7 +95,7 @@ public class DebugStructDataOutput extends StructDataOutput {
             throw new IllegalArgumentException("writeIntMinMax(" + fromMin + ", " + toMax + ", " + value + ") expecting constraint: min <= value < max");
         }
         int nBits = countBitsIntMinMax(fromMin, toMax);
-        printlnIncr(nBits, "intMinMax(" + fromMin + ", " + toMax + "): " + value);
+        printlnInstr(nBits, "intMinMax(" + fromMin + ", " + toMax + ")", value);
     }
 
     private int countBitsIntMinMax(int fromMin, int toMax) {
@@ -100,7 +106,7 @@ public class DebugStructDataOutput extends StructDataOutput {
 
     @Override
     public void writeByte(byte value) {
-        printlnIncr(8, "byte: " + (int) value);
+        printlnInstr(8, "byte", (int) value);
     }
     
     @Override
@@ -110,43 +116,43 @@ public class DebugStructDataOutput extends StructDataOutput {
     
     @Override
     public void writeBytes(byte[] dest, int offset, int len) {
-        printIncr(8*len, "bytes: ");
         final int maxI = offset+len;
+        StringBuilder sb = new StringBuilder();
         for(int i = offset; i < maxI; i++) {
-            out.print((int) dest[i]);
+            sb.append((int) dest[i]);
             if ((i + 1) < maxI) {
-                print(" ");
+                sb.append(' ');
             }
         }
-        println();
+        printlnInstr(8*len, "bytes", sb.toString());
     }
     
     @Override
     public void writeInt(int value) {
-        printlnIncr(32, "int: " + value);
+        printlnInstr(32, "int", value);
     }
 
     @Override
     public void writeInts(int[] values, int offset, int len) {
-        printIncr(32*len, "ints: ");
         final int maxI = offset + len;
+        StringBuilder sb = new StringBuilder();
         for(int i = offset; i < maxI; i++) {
-            out.print(values[i]);
+            sb.append(values[i]);
             if ((i + 1) < maxI) {
-                print(" ");
+                sb.append(" ");
             }
         }
-        println();
+        printlnInstr(32*len, "ints", sb.toString());
     }
 
     @Override
     public void writeFloat(float value) {
-        printlnIncr(32, "float: " + value);
+        printlnInstr(32, "float", Float.toString(value));
     }
     
     @Override
     public void writeDouble(double value) {
-        printlnIncr(64, "double: " + value);
+        printlnInstr(64, "double", Double.toString(value));
     }
 
     // cf java.io.DataOutputStream
@@ -162,13 +168,13 @@ public class DebugStructDataOutput extends StructDataOutput {
             try { din.close(); } catch(IOException ex) {}
         }
         int nBits = 8 * tmpCount.getCount();
-        printlnIncr(nBits, "UTF: " + value.replace("\n", "\\n"));
+        printlnInstr(nBits, "UTF", value.replace("\n", "\\n"));
     }
     
     @Override
     public void writeHuffmanCode(HuffmanBitsCode code) {
         int nBits = code.getBitsCount();
-        printlnIncr(nBits, "huffmanCode: " + code.codeToString()); 
+        printlnInstr(nBits, "huffmanCode", code.codeToString()); 
     }
 
     @Override
@@ -179,7 +185,7 @@ public class DebugStructDataOutput extends StructDataOutput {
         } else {
             nBits += countBitsIntMinMax(min, max);
         }
-        printlnIncr(nBits, "uintLtMinElseMax(" + min + ", " + max + "): " + value);
+        printlnInstr(nBits, "uintLtMinElseMax(" + min + ", " + max + ")", value);
     }
 
     @Override
@@ -200,7 +206,7 @@ public class DebugStructDataOutput extends StructDataOutput {
         } else {
             nBits += countBitsIntMinMax(1, max);
         }
-        printlnIncr(nBits, "uint0ElseMax(" + max + "): " + value);
+        printlnInstr(nBits, "uint0ElseMax(" + max + ")", value);
     }
 
 }

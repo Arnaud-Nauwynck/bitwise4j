@@ -9,7 +9,7 @@ import fr.an.util.encoder.huffman.HuffmanBitsCode;
  * 
  * implementation note: use abstract class instead of interface ... for performance
  */
-public abstract class StructDataOutput extends BitOutputStream {
+public abstract class StructDataOutput extends BitOutputStream implements IStreamMultiplexerSupport {
 
     public abstract void writeBit(boolean value);
 
@@ -35,5 +35,8 @@ public abstract class StructDataOutput extends BitOutputStream {
     public abstract void writeUIntLt16ElseMax(int max, int value);
     public abstract void writeUIntLt2048ElseMax(int max, int value);
     public abstract void writeUInt0ElseMax(int max, int value);
-    
+
+
+    public abstract void debugComment(String msg); 
+
 }

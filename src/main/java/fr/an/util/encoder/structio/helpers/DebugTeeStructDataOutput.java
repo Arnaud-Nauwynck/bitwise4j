@@ -43,8 +43,25 @@ public class DebugTeeStructDataOutput extends StructDataOutput {
         out1.flush();
         out2.flush();
     }
-
     
+    @Override
+    public void debugComment(String msg) {
+        out1.debugComment(msg);
+        out2.debugComment(msg);
+    }
+
+    @Override
+    public String getCurrStream() {
+        return out1.getCurrStream();
+    }
+
+    @Override
+    public String setCurrStream(String name) {
+        String res = out1.setCurrStream(name);
+        out2.setCurrStream(name);
+        return res;
+    }
+
     @Override
     public void writeBit(boolean value) {
         out1.writeBit(value);

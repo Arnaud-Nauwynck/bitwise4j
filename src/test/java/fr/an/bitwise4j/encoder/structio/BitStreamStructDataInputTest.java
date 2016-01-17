@@ -266,6 +266,5 @@ public class BitStreamStructDataInputTest {
         // Post-check
         sut.close();
     }
-    
 
 }

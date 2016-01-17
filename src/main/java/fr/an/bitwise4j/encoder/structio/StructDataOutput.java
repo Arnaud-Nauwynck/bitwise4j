@@ -40,5 +40,6 @@ public abstract class StructDataOutput extends BitOutputStream implements IStrea
     public abstract void debugComment(String msg); 
 
     public abstract void writeIntsSorted(int min, int max, boolean distincts, int[] values, int fromIndex, int toIndex);
+//    public abstract void writeIntsSortedSegments(int min, int max, int[] values, int fromIndex, int toIndex);
     
 }

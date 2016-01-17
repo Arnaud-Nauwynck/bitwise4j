@@ -1,7 +1,5 @@
 package fr.an.bitwise4j.encoder.varlength;
 
-import java.io.IOException;
-
 import fr.an.bitwise4j.bits.BitOutputStream;
 import fr.an.bitwise4j.encoder.huffman.HuffmanBitsCode;
 import fr.an.bitwise4j.encoder.huffman.HuffmanTreeLeaf;
@@ -179,7 +177,7 @@ public class VarLengthEncoder {
 		}		
 	}
 
-	public void writeHuffmanSymbol(HuffmanTreeLeaf symNode) {
+	public void writeHuffmanSymbol(HuffmanTreeLeaf<?> symNode) {
 		HuffmanBitsCode code = symNode.getResultCode();
 		int bitsCount = code.getBitsCount();
 		writeUInt(code.getBits(), bitsCount);

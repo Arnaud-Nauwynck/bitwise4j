@@ -58,7 +58,7 @@ public class BitsCounterEncoder extends VarLengthEncoder {
 	}
 	
 	@Override
-	public void writeHuffmanSymbol(HuffmanTreeLeaf symNode) {
+	public void writeHuffmanSymbol(HuffmanTreeLeaf<?> symNode) {
 		HuffmanBitsCode code = symNode.getResultCode();
 		int bitsCount = code.getBitsCount();
 		incrCount(bitsCount);

@@ -164,19 +164,19 @@ public class VarLengthDecoder {
 		}		
 	}
 
-	public HuffmanTreeLeaf readHuffmanSymbol(HuffmanTable table) {
-		HuffmanTreeLeaf res = null;
+	public <T> HuffmanTreeLeaf<T> readHuffmanSymbol(HuffmanTable<T> table) {
+		HuffmanTreeLeaf<T> res = null;
 		if (table.getSymbolCount() > 1) {
-			HuffmanTreeNode node = table.getRootNode();
+			HuffmanTreeNode<T> node = table.getRootNode();
 			for (;;) {
-				HuffmanTreeNode treeNode = (HuffmanTreeNode) node;
+				HuffmanTreeNode<T> treeNode = (HuffmanTreeNode<T>) node;
 				boolean bit = readBit();
-				AbstractHuffmanNode child = treeNode.getChildLeftRight(bit);
+				AbstractHuffmanNode<T> child = treeNode.getChildLeftRight(bit);
 				if (child.isLeaf()) {
-					res = (HuffmanTreeLeaf) child;
+					res = (HuffmanTreeLeaf<T>) child;
 					break;
 				} else {
-					node = (HuffmanTreeNode) child;
+					node = (HuffmanTreeNode<T>) child;
 				}
 			}
 		} else {

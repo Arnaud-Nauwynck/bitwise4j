@@ -153,7 +153,7 @@ public class DebugStructDataInput extends StructDataInput {
     
     @Override
     public int readBits(int readBitsCounts) {
-        String tmpValue = readlnIncrInstructionValue(readBitsCounts, "bits", null);
+        String tmpValue = readlnIncrInstructionValue(readBitsCounts, "NBits", null);
         return BitsUtil.stringToBits(tmpValue);
     }
     
@@ -215,9 +215,13 @@ public class DebugStructDataInput extends StructDataInput {
     public void readInts(int[] dest, int offset, int len) {
         int nBits = 32 * len;
         String tmpValue = readlnIncrInstructionValue(nBits, "ints", null);
-        Scanner scanner = new Scanner(tmpValue);
-        for(int i = 0; i < len; i++) {
-            dest[offset+i] = scanner.nextInt();
+        parseInts(dest, offset, offset+len, tmpValue);
+    }
+
+    private static void parseInts(int[] dest, int fromIndex, int toIndex, String valuesStr) {
+        Scanner scanner = new Scanner(valuesStr);
+        for(int i = fromIndex; i < toIndex; i++) {
+            dest[i] = scanner.nextInt();
         }
         scanner.close();
     }
@@ -287,6 +291,13 @@ public class DebugStructDataInput extends StructDataInput {
         }
         checkIncr(prevCount, nBits);
         return res;
+    }
+
+    @Override
+    public void readIntsSorted(int min, int max, boolean distincts, int[] dest, int fromIndex, int toIndex) {
+        String tmpValue = readlnIncrInstructionValue(-1, "intsSorted", "" + (toIndex - fromIndex)); // -1: size unknown while reading
+        parseInts(dest, fromIndex, toIndex, tmpValue);
+        // checkIncr(prevCount, nBits);
     }
 
 }

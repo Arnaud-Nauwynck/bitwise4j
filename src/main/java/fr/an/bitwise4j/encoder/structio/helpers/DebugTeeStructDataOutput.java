@@ -39,7 +39,7 @@ public class DebugTeeStructDataOutput extends StructDataOutput {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void flush() {
         out1.flush();
         out2.flush();
     }
@@ -180,6 +180,12 @@ public class DebugTeeStructDataOutput extends StructDataOutput {
     public void write(byte[] b, int off, int len) throws IOException {
         out1.write(b, off, len);
         out2.write(b, off, len);
+    }
+
+    @Override
+    public void writeIntsSorted(int min, int max, boolean distincts, int[] values, int fromIndex, int toIndex) {
+        out1.writeIntsSorted(min, max, distincts, values, fromIndex, toIndex);
+        out2.writeIntsSorted(min, max, distincts, values, fromIndex, toIndex);
     }
 
     // ------------------------------------------------------------------------

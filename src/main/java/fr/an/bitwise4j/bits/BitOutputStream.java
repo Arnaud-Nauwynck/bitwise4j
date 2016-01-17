@@ -13,6 +13,10 @@ public abstract class BitOutputStream extends OutputStream {
     // override without the annoying "throws IOException" 
     public abstract void close();
     
+    // override without the annoying "throws IOException" 
+    public void flush() {
+    }
+
 	/**
 	 * Write a single bit to the stream
 	 */

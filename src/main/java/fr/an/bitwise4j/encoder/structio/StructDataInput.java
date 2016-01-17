@@ -36,5 +36,7 @@ public abstract class StructDataInput extends BitInputStream implements IStreamM
     public abstract int readUIntLt16ElseMax(int max);
     public abstract int readUIntLt2048ElseMax(int max);
     public abstract int readUInt0ElseMax(int max);
-    
+
+    public abstract void readIntsSorted(int min, int max, boolean distincts, int[] dest, int fromIndex, int toIndex);
+
 }

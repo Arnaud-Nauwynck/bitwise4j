@@ -167,4 +167,22 @@ public class BitStreamStructDataOutput extends StructDataOutput {
         }
     }
 
+    @Override
+    public void writeIntsSorted(int min, int max, boolean distincts, int[] values, int fromIndex, int toIndex) {
+        recursiveWriteIntsSorted(min, max, distincts, values, fromIndex, toIndex);
+    }
+
+    private void recursiveWriteIntsSorted(int min, int max, boolean distincts, int[] values, int fromIndex, int toIndex) {
+        // divide&conquer ... first encode mid, then recursive left, then recursive right
+        int midIndex = (toIndex + fromIndex) >>> 1;
+        int midValue = values[midIndex];
+        writeIntMinMax(min, max, midValue);
+        if (fromIndex < midIndex) {
+            recursiveWriteIntsSorted(min, (distincts)? midValue-1:midValue, distincts, values, fromIndex, midIndex);  
+        }
+        if (midIndex+1 < toIndex) {
+            recursiveWriteIntsSorted((distincts)? midValue+1:midValue, max, distincts, values, midIndex+1, toIndex);  
+        }
+    }
+    
 }

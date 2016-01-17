@@ -193,4 +193,22 @@ public class BitStreamStructDataInput extends StructDataInput {
         return res;
     }
 
+    @Override
+    public void readIntsSorted(int min, int max, boolean distincts, int[] dest, int fromIndex, int toIndex) {
+        recursiveReadIntsSorted(min, max, distincts, dest, fromIndex, toIndex);
+    }
+
+    private void recursiveReadIntsSorted(int min, int max, boolean distincts, int[] dest, int fromIndex, int toIndex) {
+        // divide&conquer ... first encode mid, then recursive left, then recursive right
+        int midIndex = (toIndex + fromIndex) >>> 1;
+        int midValue = readIntMinMax(min, max);
+        dest[midIndex] = midValue; 
+        if (fromIndex < midIndex) {
+            recursiveReadIntsSorted(min, (distincts)? midValue-1:midValue, distincts, dest, fromIndex, midIndex);  
+        }
+        if (midIndex+1 < toIndex) {
+            recursiveReadIntsSorted((distincts)? midValue+1:midValue, max, distincts, dest, midIndex+1, toIndex);  
+        }
+    }
+ 
 }

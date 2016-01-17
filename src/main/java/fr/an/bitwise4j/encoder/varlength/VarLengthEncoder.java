@@ -39,7 +39,7 @@ public class VarLengthEncoder {
 	public void flush() {
 		try {
 			output.flush();
-		} catch(IOException ioex) {
+		} catch(Exception ioex) {
 			throw new RuntimeException(ioex);
 		}
 	}

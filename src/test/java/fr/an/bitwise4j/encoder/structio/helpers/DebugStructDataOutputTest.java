@@ -18,10 +18,10 @@ public class DebugStructDataOutputTest {
         StringBuilder checkRes = new StringBuilder();
         // Perform
         sut.writeUInt0ElseMax(8, 0); // => test bit: "0"
-        checkRes.append("[1: 1] uint0ElseMax(8): 0\n");
+        checkRes.append(":1:1/1:1/1:uint0ElseMax(8): 0\n");
         Assert.assertEquals(checkRes.toString(), buffer.toString());
         sut.writeUInt0ElseMax(8, 1); // => test bit: "1" + value "111"
-        checkRes.append("[4: 5] uint0ElseMax(8): 1\n");
+        checkRes.append(":4:5/5:2/2:uint0ElseMax(8): 1\n");
         Assert.assertEquals(checkRes.toString(), buffer.toString());
         // Post-check
         sut.close();

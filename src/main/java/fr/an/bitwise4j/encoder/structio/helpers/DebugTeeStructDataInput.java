@@ -226,6 +226,22 @@ public class DebugTeeStructDataInput extends StructDataInput {
     }
 
     @Override
+    public void readIntsSorted(int min, int max, boolean distincts, int[] dest, int fromIndex, int toIndex) {
+        countInstr++;
+        in1.readIntsSorted(min, max, distincts, dest, fromIndex, toIndex);
+        int len = toIndex-fromIndex;
+        int[] dest2 = new int[len];
+        in2.readIntsSorted(min, max, distincts, dest2, 0, len);
+        int foundDiff1 = arrayFindFirstDiff(dest, fromIndex, dest2, 0, len);
+        if (foundDiff1 != -1) {
+            int elt1 = dest[foundDiff1];
+            int elt2 = dest2[foundDiff1-fromIndex];
+            throw failEx("readIntsSorted(" + fromIndex + ", len) [" + foundDiff1 + "] "+ elt1 + " != " + elt2);
+        }
+    }
+    
+        
+    @Override
     public int read(byte[] b) {
         countInstr++;
         return read(b, 0, b.length);

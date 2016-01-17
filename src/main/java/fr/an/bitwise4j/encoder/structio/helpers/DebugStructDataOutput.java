@@ -134,15 +134,19 @@ public class DebugStructDataOutput extends StructDataOutput {
 
     @Override
     public void writeInts(int[] values, int offset, int len) {
-        final int maxI = offset + len;
+        String str = intsToString(values, offset, offset + len);
+        printlnInstr(32*len, "ints", str);
+    }
+
+    private static String intsToString(int[] values, int fromIndex, final int toIndex) {
         StringBuilder sb = new StringBuilder();
-        for(int i = offset; i < maxI; i++) {
+        for(int i = fromIndex; i < toIndex; i++) {
             sb.append(values[i]);
-            if ((i + 1) < maxI) {
+            if ((i + 1) < toIndex) {
                 sb.append(" ");
             }
         }
-        printlnInstr(32*len, "ints", sb.toString());
+        return sb.toString();
     }
 
     @Override
@@ -209,4 +213,25 @@ public class DebugStructDataOutput extends StructDataOutput {
         printlnInstr(nBits, "uint0ElseMax(" + max + ")", value);
     }
 
+    @Override
+    public void writeIntsSorted(int min, int max, boolean distincts, int[] values, int fromIndex, int toIndex) {
+        int nBits = recursiveCountBitsIntsSorted(min, max, distincts, values, fromIndex, toIndex);
+        String str = intsToString(values, fromIndex, toIndex);
+        printlnInstr(nBits, "intsSorted(" + (toIndex-fromIndex) + ")", str);
+    }
+    
+    private int recursiveCountBitsIntsSorted(int min, int max, boolean distincts, int[] values, int fromIndex, int toIndex) {
+        // divide&conquer ... first encode mid, then recursive left, then recursive right
+        int midIndex = (toIndex + fromIndex) >>> 1;
+        int midValue = values[midIndex];
+        int res = countBitsIntMinMax(min, max);
+        if (fromIndex < midIndex) {
+            res += recursiveCountBitsIntsSorted(min, (distincts)? midValue-1:midValue, distincts, values, fromIndex, midIndex);  
+        }
+        if (midIndex+1 < toIndex) {
+            res += recursiveCountBitsIntsSorted((distincts)? midValue+1:midValue, max, distincts, values, midIndex+1, toIndex);  
+        }
+        return res;
+    }
+    
 }
